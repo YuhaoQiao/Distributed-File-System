@@ -78,3 +78,19 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
             #Fufill request
             self.finish_request(request, client_address)
  """========================================================="""
+    """
+    =========================================================
+                    SOCKET OPERATIONS
+    =========================================================
+    """
+    #Every time a directory is changed, check which socket we have to send from
+    def resolve_socket(self, path):
+          #path = os.path.expanduser(path)
+          while path not in self.servers:
+            #Go up one directory
+            path = os.path.dirname(os.path.normpath(path))
+          
+          self.socketToSend = self.servers[path]
+          
+    
+    """========================================================="""
