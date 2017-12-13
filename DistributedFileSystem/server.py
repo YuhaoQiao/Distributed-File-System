@@ -47,53 +47,7 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
     =========================================================
                 THREAD INITIALIZATION FUNCTIONS
     =========================================================
-    """
-    #Main server loop
-    def serve_always(self):
-        #Create the request queue
-        self.request_queue = Queue.Queue(self.pool_size)
-        for t in range(self.pool_size):
-            t = threading.Thread(target = self.process_request_thread) #Initialize threads
-            #print "Starting pool thread ", t.name
-            t.start()
 
-        while 1:
-            self.handle_request() #Get the ball rolling
-
-    #Start handling the requests sent to the server
-    def handle_request(self):
-        #requests are essentially socket objects
-        request, client_address = self.get_request()
-        #Place in the queue
-        self.request_queue.put((request,client_address))
-
-    #Get a request from the queue
-    def process_request_thread(self):
-        while 1:
-            #ThreadingMixIn.process_request_thread(self, self.request_queue.get())
-            try:
-                request, client_address = self.request_queue.get()
-            except Queue.Empty:
-                pass
-            #Fufill request
-            self.finish_request(request, client_address)
- """========================================================="""
-    """
-    =========================================================
-                    SOCKET OPERATIONS
-    =========================================================
-    """
-    #Every time a directory is changed, check which socket we have to send from
-    def resolve_socket(self, path):
-          #path = os.path.expanduser(path)
-          while path not in self.servers:
-            #Go up one directory
-            path = os.path.dirname(os.path.normpath(path))
-          
-          self.socketToSend = self.servers[path]
-          
-    
-    """========================================================="""
 """
     =========================================================
                     DIRECTORY OPERATIONS
