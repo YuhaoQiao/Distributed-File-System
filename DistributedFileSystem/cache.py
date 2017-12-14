@@ -25,3 +25,45 @@ class Cache:
             return True
         else:
             return False
+    #Delete the oldest entry in the cache
+    def purge_entry(self):
+        key = keys.popleft()
+        self.remove(key)
+
+    #Remove a given key/file from the cache
+    def remove(self, key):
+        del self.cache[key]
+        print "{0} removed from cache".format(key)
+
+    #Add a key and value to the cache
+    def add(self, key, value):
+        #Check if the cache is full
+        if len(self.keys) == self.CACHE_MAX_SIZE:
+            purge_entry()
+
+        self.cache[key] = value
+        #Add value to the deque
+        self.keys.append(key)
+        print "{0} added to the cache".format(key)
+
+    #Retrieve an element from the cache
+    def retrieve(self, key):
+        #if self.search_cache(key):
+        return self.cache[key]
+        #else
+        #    return -1
+   
+    def refresh_cache(self):
+        if not self.cache:
+            pass
+        else:
+            for key in self.cache:
+               data = self.cache[key]
+               #I should probably lock these operations too.
+               fo = open(key, "r")
+               newData = fo.read()
+               fo.close()
+               if newData == data:
+                   pass
+               else:
+                   self.cache[key] = newData
