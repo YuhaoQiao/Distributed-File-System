@@ -43,11 +43,7 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
     
     socketToSend = s1
     
-    """
-    =========================================================
-                THREAD INITIALIZATION FUNCTIONS
-    =========================================================
- """
+
     #Main server loop
     def serve_always(self):
         #Create the request queue
@@ -78,13 +74,7 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
             #Fufill request
             self.finish_request(request, client_address)
 
-    """========================================================="""
 
-    """
-    =========================================================
-                    SOCKET OPERATIONS
-    =========================================================
-    """
     #Every time a directory is changed, check which socket we have to send from
     def resolve_socket(self, path):
           #path = os.path.expanduser(path)
@@ -95,12 +85,6 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
           self.socketToSend = self.servers[path]
           
     
-    """========================================================="""
-"""
-    =========================================================
-                    DIRECTORY OPERATIONS
-    =========================================================
-    """
 
     def dir_change(self, path):
         #if path == os.pardir:
@@ -126,13 +110,6 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
 
         return dirlst
 
-    """========================================================="""
-
-    """
-    =========================================================
-                    THREAD MAIN LOOP
-    =========================================================
-    """
 
     #This is where the work is done
     def finish_request(self, request, client_address):
@@ -203,7 +180,6 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
                     self.shutdown()
 
 
-    """========================================================="""
     def shutdown(self):
         server.server_close()
         #Force shutdown
