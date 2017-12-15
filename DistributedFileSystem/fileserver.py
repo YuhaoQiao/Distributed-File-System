@@ -17,11 +17,7 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
     initialized = False
     root_dir = None
     
-    """
-    =========================================================
-                THREAD INITIALIZATION FUNCTIONS
-    =========================================================
-    """
+    
     #Main server loop
     def serve_always(self):
         #Create the request queue
@@ -52,7 +48,6 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
             #Fufill request
             self.finish_request(request, client_address)
 
-    """========================================================="""
 
  def find_file(self, path):
         return os.path.exists(path)
@@ -133,12 +128,6 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
             response = "File {0} has been written\n".format(path)
             return response
 
-    """========================================================="""
- """
-    =========================================================
-                    THREAD MAIN LOOP
-    =========================================================
-    """
 
     #This is where the work is done
     def finish_request(self, request, client_address):
@@ -182,7 +171,6 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
                         print "Shutting down File Server"
                         self.shutdown() 
 
-    """========================================================="""
 
     def shutdown(self):
         server.server_close()
