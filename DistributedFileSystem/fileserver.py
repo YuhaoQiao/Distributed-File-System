@@ -134,3 +134,74 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
             return response
 
     """========================================================="""
+ """
+    =========================================================
+                    THREAD MAIN LOOP
+    =========================================================
+    """
+
+    #This is where the work is done
+    def finish_request(self, request, client_address):
+        while 1:
+            if not self.initialized:
+                #Initialize root directory
+                data = request.recv(1024)
+              
+                self.root_dir = data
+                self.dir_current = self.root_dir
+                self.initialized = True
+                response = "File Server initialized"
+                request.sendto(response, client_address)
+            else:
+                #Recieve data from client
+                data = request.recv(1024)
+                self.dir_current = os.path.expanduser(self.dir_current)
+                os.chdir(self.dir_current)
+    
+                if not data:
+                    response = "The directory server received nothing"
+                    request.sendto(response, client_address)
+                else:
+                    
+                    if data.startswith("READ FILE"):
+                        r = re.compile("READ FILE (.*?)$")
+                        res = r.search(data)
+                        path = res.group(1)
+                        response = self.read_file(path)
+                        request.sendto(response, client_address)
+    
+                    if data.startswith("WRITE FILE"):
+                        r = re.compile("WRITE FILE (.*?)$")
+                        res = r.search(data)
+                        s = res.group(1)
+                        data = s.split(" ", 1)
+                        response = self.write_file(data)
+                        request.sendto(response, client_address)
+                        
+                    if data.startswith("QUIT"):
+                        print "Shutting down File Server"
+                        self.shutdown() 
+
+    """========================================================="""
+
+    def shutdown(self):
+        server.server_close()
+        #Force shutdown
+        os._exit(os.EX_OK)
+
+class ThreadedRequestHandler(SocketServer.BaseRequestHandler):
+    pass
+
+class FileServer(ThreadPoolMixIn, SocketServer.TCPServer):
+    pass
+
+if __name__ == "__main__":
+
+    HOST = "0.0.0.0"
+    PORT = int(sys.argv[1])
+    server = FileServer((HOST, PORT), ThreadedRequestHandler)
+    print "File Server started - ", HOST, PORT
+    try:
+        server.serve_always()
+    except KeyboardInterrupt:
+        server.shutdown()
