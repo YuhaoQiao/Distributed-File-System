@@ -54,3 +54,83 @@ class ThreadPoolMixIn(SocketServer.ThreadingMixIn):
 
     """========================================================="""
 
+ def find_file(self, path):
+        return os.path.exists(path)
+
+
+    def read_file(self, path):
+        #If the file is in the cache, retreive from there
+        if self.cache.search(path):
+            data = self.cache.retrieve(path)
+            print "{0} retrieved from cache".format(path)
+            return data
+        else:
+        #Retreive data the standard way
+            if '/' in path:
+                full_dir = os.path.expanduser(path)
+
+                if not self.find_file(full_dir):
+                    return "No such file or directory"
+
+                #File is found, change the directory
+                path1, file = os.path.split(full_dir)
+                try:
+                    os.chdir(path1)
+                except OSError:
+                    #The other one should've caught this
+                    return "No such file or directory"
+            else:
+                #File is in the current directory
+                file = path
+            #Try to acquire the lock
+            if not self.locker.acquire_lock(file):
+                locked = "File is locked, no cached copy available"
+                return locked
+            else:
+                try:
+                    fo = open(file, "r")
+                except IOError:
+                    return "No such file or directory - open"
+                data = fo.read()
+                fo.close()
+                #Release the lock
+                self.locker.release_lock(file)
+                self.cache.add(path, data)
+                return data
+
+    def write_file(self, data_in):
+        #Seperate out the two components
+        path = data_in[0]
+        data =  data_in[1]
+        if '/' in path:
+            #User entered path in the form ~/DFS-FILES/path
+            if "~/DFS-FILES" in path:
+                full_dir = os.path.expanduser(path)
+            else:
+                #User implied the working dir; append it to the path
+                full_dir = os.getcwd() + '/' + path
+
+            path1, file = os.path.split(full_dir)
+            try:
+                os.chdir(path1)
+            except OSError:
+                #If the dir does not exist - make it
+                print "Directory does not exist; creating..."
+                os.mkdir(path1)
+                os.chdir(path1)
+        else:
+            file = path
+        #Try to acquire the lock
+        if not self.locker.acquire_lock(file):
+            locked = "File is locked, no cached copy available"
+            return locked
+        else:
+            fo = open(file, "w")
+            fo.write(data)
+            fo.close()
+            #Release the lock
+            self.locker.release_lock(file)
+            response = "File {0} has been written\n".format(path)
+            return response
+
+    """========================================================="""
